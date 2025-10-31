@@ -1,6 +1,7 @@
 {
-  "name": "test-project",
+  "name": "notion-trade-journal-bridge",
   "version": "0.1.0",
+  "description": "Notion Trade Journal Bridge – voice-first trading journal with AI and Notion sync",
   "private": true,
   "scripts": {
     "dev": "next dev",

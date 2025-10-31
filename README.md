@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with TypeScript, Tailwind CSS, and ESLint.
+# Notion Trade Journal Bridge
+
+A voice-first trading journal that syncs trades, journals, and screenshots to Notion and generates AI reviews and weekly summaries.
 
 ## Getting Started
 
