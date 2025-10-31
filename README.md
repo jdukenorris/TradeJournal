@@ -1,40 +1,124 @@
 # Notion Trade Journal Bridge
 
-A voice-first trading journal that syncs trades, journals, and screenshots to Notion and generates AI reviews and weekly summaries.
+Voice-first trading journal that syncs to Notion and provides AI reviews.
 
-## Getting Started
+## Week 1 Setup (Core Auth + Testing)
 
-First, make sure you have Node.js installed (version 18 or higher).
+### Prerequisites
 
-Then install dependencies:
+- Node.js 20+ 
+- npm or yarn
+- Supabase account (for database and auth)
+- GitHub account (for CI/CD)
 
-```bash
-npm install
+### Initial Setup
+
+1. **Clone and install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Set up Supabase (Easy with MCP!):**
+   
+   **🚀 Recommended: Use the automated setup script:**
+   ```bash
+   npm run setup:supabase
+   ```
+   
+   This will guide you through:
+   - Getting your Supabase Personal Access Token
+   - Entering your project credentials
+   - Setting up MCP (Model Context Protocol) for easy AI-assisted management
+   
+   **📖 Detailed guide: See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**
+   
+   After running the script, restart Cursor and ask the AI assistant to:
+   - Run the database migration
+   - Enable MFA in your project
+   - Verify everything is configured correctly
+
+3. **Configure environment variables:**
+   
+   Create a `.env.local` file in the project root:
+   ```bash
+   touch .env.local
+   ```
+   
+   Add your Supabase credentials:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+   SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+   
+   Replace with your actual values from Supabase dashboard → Settings → API
+
+5. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+6. **Run tests:**
+   ```bash
+   # Unit tests
+   npm run test:unit
+   
+   # E2E tests
+   npm run test:e2e
+   
+   # E2E tests with UI
+   npm run test:e2e:ui
+   ```
+
+### Project Structure
+
+```
+src/
+├── app/                    # Next.js app router pages
+│   ├── sign-in/           # Sign in page + TOTP verification
+│   ├── sign-up/           # Sign up page
+│   ├── dashboard/         # Protected dashboard
+│   ├── settings/          # Settings pages (MFA)
+│   └── auth/              # Auth callbacks
+├── lib/
+│   ├── supabase/          # Supabase client utilities
+│   └── auth.ts            # Auth helpers
+├── components/            # React components
+└── test/                  # Test setup
+
+tests/
+├── e2e/                   # Playwright E2E tests
+└── unit/                  # Vitest unit tests
+
+supabase/
+└── migrations/            # Database migrations
 ```
 
-Run the development server:
+### Features Implemented (Week 1)
 
-```bash
-npm run dev
-```
+✅ Password authentication (sign-up/sign-in)  
+✅ TOTP/MFA enrollment and verification  
+✅ Protected routes with middleware  
+✅ Database schema (user_security, user_backup_codes, broker_connections)  
+✅ Testing infrastructure (Vitest, Playwright, RTL)  
+✅ CI/CD setup (GitHub Actions)  
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Next Steps (Week 2)
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+- Broker + Notion connection setup
+- CSV import functionality
+- Trade mapping system
 
-## Learn More
+### Testing
 
-To learn more about Next.js, take a look at the following resources:
+The project includes:
+- **Unit tests** (Vitest): Test utilities and business logic
+- **Component tests** (React Testing Library): Test React components
+- **E2E tests** (Playwright): Test full user flows
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+CI runs all tests on push/PR to main branch.
 
-## Project Structure
+### Deployment
 
-- `src/app/` - App Router directory containing pages and layouts
-- `src/app/layout.tsx` - Root layout component
-- `src/app/page.tsx` - Home page
-- `src/app/globals.css` - Global styles with Tailwind CSS
-- `next.config.js` - Next.js configuration
-- `tsconfig.json` - TypeScript configuration
-- `tailwind.config.ts` - Tailwind CSS configuration
+See `DEPLOY.md` for deployment instructions.
