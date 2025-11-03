@@ -21,7 +21,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'symbol required' }, { status: 400 })
     }
 
-    // find device online
     const { data: device } = await supabase
       .from('devices')
       .select('*')
@@ -31,7 +30,6 @@ export async function POST(req: Request) {
       .limit(1)
       .maybeSingle()
 
-    // create capture row
     const { data: captureRow, error: insertErr } = await supabase
       .from('captures')
       .insert({
@@ -52,7 +50,6 @@ export async function POST(req: Request) {
 
     const admin = createAdminClient()
 
-    // prepare signed upload URLs
     const uploads: Record<string, { path: string; signedUrl: string }> = {}
     for (const tf of tfs) {
       const objectPath = `user/${user.id}/capture/${captureRow.id}/${tf}.png`
@@ -65,7 +62,6 @@ export async function POST(req: Request) {
       uploads[tf] = { path: objectPath, signedUrl: data.signedUrl }
     }
 
-    // optional layout lookup
     let layout: any = null
     if (layoutId) {
       const { data } = await supabase
@@ -76,7 +72,6 @@ export async function POST(req: Request) {
       layout = data
     }
 
-    // command object for device (Mode A) or for Mode B worker
     const command = {
       captureId: captureRow.id,
       symbol,
@@ -92,30 +87,27 @@ export async function POST(req: Request) {
       detail: { mode: device ? 'A' : 'B' }
     })
 
-    // If Mode B and a render service is configured, synchronously render and upload
     if (!device && process.env.PLAYWRIGHT_SERVICE_URL) {
-      try {
-        const resp = await fetch(`${process.env.PLAYWRIGHT_SERVICE_URL}/render`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.PLAYWRIGHT_SERVICE_TOKEN || ''}`
-          },
-          body: JSON.stringify({ layoutUrl: layout?.modeB_view_only_url, symbol, tfs, zoomProfile: command.zoomPreset })
-        })
-        if (resp.ok) {
-          const { images } = await resp.json()
-          const adminUpload = createAdminClient()
-          for (const tf of tfs) {
-            const objectPath = `user/${user.id}/capture/${captureRow.id}/${tf}.png`
-            const buf = Buffer.from((images[tf] || '').split(',')[1] || '', 'base64')
-            await adminUpload.storage.from(CAPTURE_BUCKET).upload(objectPath, buf, { contentType: 'image/png', upsert: true })
-            await supabase.from('capture_images').insert({ capture_id: captureRow.id, tf, object_key: objectPath })
-          }
-          await supabase.from('captures').update({ status: 'done' }).eq('id', captureRow.id)
-          await supabase.from('capture_events').insert({ capture_id: captureRow.id, step: 'completed', detail: { mode: 'B' } })
+      const resp = await fetch(`${process.env.PLAYWRIGHT_SERVICE_URL}/render`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.PLAYWRIGHT_SERVICE_TOKEN || ''}`
+        },
+        body: JSON.stringify({ layoutUrl: layout?.modeB_view_only_url, symbol, tfs, zoomProfile: command.zoomPreset })
+      }).catch(() => null)
+      if (resp && resp.ok) {
+        const { images } = await resp.json()
+        const adminUpload = createAdminClient()
+        for (const tf of tfs) {
+          const objectPath = `user/${user.id}/capture/${captureRow.id}/${tf}.png`
+          const buf = Buffer.from((images[tf] || '').split(',')[1] || '', 'base64')
+          await adminUpload.storage.from(CAPTURE_BUCKET).upload(objectPath, buf, { contentType: 'image/png', upsert: true })
+          await supabase.from('capture_images').insert({ capture_id: captureRow.id, tf, object_key: objectPath })
         }
-      } catch {}
+        await supabase.from('captures').update({ status: 'done' }).eq('id', captureRow.id)
+        await supabase.from('capture_events').insert({ capture_id: captureRow.id, step: 'completed', detail: { mode: 'B' } })
+      }
     }
 
     return NextResponse.json({

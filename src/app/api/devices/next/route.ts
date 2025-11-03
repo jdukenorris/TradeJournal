@@ -12,7 +12,6 @@ export async function GET(req: Request) {
   }
   const admin = createAdminClient()
 
-  // find next capture queued for this device
   const { data: captures, error } = await admin
     .from('captures')
     .select('*')
@@ -23,7 +22,6 @@ export async function GET(req: Request) {
   const capture = captures?.[0]
   if (!capture) return new NextResponse(null, { status: 204 })
 
-  // generate signed upload URLs per timeframe
   const uploads: Record<string, { path: string; signedUrl: string }> = {}
   for (const tf of capture.requested_tfs as string[]) {
     const objectPath = `user/${capture.user_id}/capture/${capture.id}/${tf}.png`

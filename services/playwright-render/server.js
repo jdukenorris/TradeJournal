@@ -1,6 +1,3 @@
-// Minimal Playwright render service
-// Requires: npm i express playwright
-
 const express = require('express')
 const { chromium } = require('playwright')
 
@@ -25,7 +22,6 @@ app.post('/render', async (req, res) => {
   try {
     await page.goto(layoutUrl, { waitUntil: 'networkidle' })
     for (const tf of tfs) {
-      // TODO: switch symbol/timeframe and zoom using DOM or keyboard
       const buf = await page.screenshot({ fullPage: false })
       out[tf] = `data:image/png;base64,${buf.toString('base64')}`
     }

@@ -33,15 +33,12 @@ async function poll() {
     const { command } = await res.json()
     const tab = await ensureTab(command.layoutUrl || 'https://www.tradingview.com/chart/')
     for (const tf of command.tfs) {
-      // naive: rely on user chart already set to right symbol/zoom
       const dataUrl = await captureVisible(tab.id)
       const target = command.uploadTargets[tf]
       await uploadSigned(target.signedUrl, dataUrl)
     }
     await fetch(`${API_BASE}/api/capture/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ captureId: command.captureId, images: Object.keys(command.uploadTargets).map(tf => ({ tf, object_key: command.uploadTargets[tf].path })) }) })
-  } catch (e) {
-    // swallow and retry later
-  }
+  } catch (e) {}
 }
 
 setInterval(poll, 5000)
