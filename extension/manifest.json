@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "TradingView Capture Helper",
+  "version": "0.1.0",
+  "description": "Captures TradingView screenshots from a logged-in session.",
+  "permissions": ["storage", "tabs", "scripting", "activeTab"],
+  "host_permissions": ["https://*.tradingview.com/*", "http://localhost/*", "https://*/"],
+  "background": { "service_worker": "service-worker.js" },
+  "options_page": "options.html"
+}
+
+

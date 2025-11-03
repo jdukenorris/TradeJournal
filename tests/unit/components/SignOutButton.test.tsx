@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import SignOutButton from '@/components/SignOutButton'
+import { SignOutButton } from '@/components/SignOutButton'
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({

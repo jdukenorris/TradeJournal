@@ -145,6 +145,16 @@ AI monitors journals + trades; flags violations with impact (e.g., “Rule break
   - Guard all app routes behind server checks; redirect to sign‑in when unauthenticated.
 - Passwords
   - Managed by Supabase Auth with modern password hashing (argon2/bcrypt per provider default). No plaintext ever.
+---
+
+### 6.9. TradingView Dual Timeframe Capture (New Feature)
+- Purpose: Capture two TradingView screenshots per request (1H and 5m) with consistent zoom, store privately, and render in the app.
+- Modes:
+  - Mode A (primary): Local Browser Extension captures from a logged‑in session so paid/invite‑only indicators appear.
+  - Mode B (fallback): Self‑hosted Playwright service screenshots a view‑only layout; labeled “no private studies”.
+- Storage & DB: Supabase Storage bucket `captures` (private) with per‑user prefixes; tables for `captures`, `capture_images`, `devices`, `layouts`, and `capture_events` with RLS.
+- UI: Capture form (symbol, TF chips 1H/5m, zoom preset), live status, gallery with filters, detail page with metadata + “Open in TV” and “Re‑capture”.
+- Link: See full spec in `./TradingViewCapture.md`.
 
 ---
 

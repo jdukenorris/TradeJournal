@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>TradingView Capture Helper</title>
+    <style>body{font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; padding:16px; max-width:600px}</style>
+  </head>
+  <body>
+    <h1>Link Device</h1>
+    <p>Paste the challenge from the app to link this browser as a capture helper.</p>
+    <input id="challenge" placeholder="challenge token" style="width:100%" />
+    <div style="margin-top:8px">
+      <button id="link">Link</button>
+    </div>
+    <div id="status" style="margin-top:8px;color:#444"></div>
+    <script>
+      const API_BASE = 'http://localhost:3000'
+      document.getElementById('link').onclick = async () => {
+        const challenge = document.getElementById('challenge').value.trim()
+        const res = await fetch(`${API_BASE}/api/devices/link/verify`, {
+          method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ challenge, type: 'extension', name: 'Browser Extension' })
+        })
+        const out = document.getElementById('status')
+        if (!res.ok) { out.textContent = 'Link failed'; return }
+        const data = await res.json()
+        await chrome.storage.local.set({ deviceToken: data.deviceToken })
+        out.textContent = 'Linked! Device ID ' + data.deviceId
+      }
+    </script>
+  </body>
+  </html>
+
+
